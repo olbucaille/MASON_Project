@@ -8,6 +8,7 @@ import java.awt.image.ColorModel;
 import javax.swing.JFrame;
 
 import agents.BotX;
+import agents.BotY;
 import sim.display.Console;
 import sim.display.Controller;
 import sim.display.Display2D;
@@ -31,8 +32,7 @@ public class SimuModelWithUI extends GUIState{
 	public Display2D display;
 	public JFrame displayFrame;
 	ContinuousPortrayal2D yardPortrayal = new ContinuousPortrayal2D();
-	public Continuous3D agitatedYard = new Continuous3D(1.0, 100, 100, 100);
-	NetworkPortrayal2D buddiesPortrayal = new NetworkPortrayal2D();
+	NetworkPortrayal2D BotPortrayal = new NetworkPortrayal2D();
 
 	public static void main(String[] args)
 	{
@@ -88,8 +88,8 @@ public class SimuModelWithUI extends GUIState{
 								{
 									public void draw(Object object, Graphics2D graphics, DrawInfo2D info)
 									{
-										
-										paint = new Color(0, 80, 0);
+										BotX b = (BotX) object;
+										paint = b.getColor();
 										info.draw.height=15;
 										info.draw.width=15;
 										super.draw(object, graphics, info);
@@ -105,8 +105,8 @@ public class SimuModelWithUI extends GUIState{
 								{
 									public void draw(Object object, Graphics2D graphics, DrawInfo2D info)
 									{
-										
-										paint = new Color(0, 190, 255);
+										BotY b = (BotY) object;
+										paint = b.getColor();
 										info.draw.height=10;
 										info.draw.width=10;
 										
@@ -116,6 +116,8 @@ public class SimuModelWithUI extends GUIState{
 								5.0, null, Color.black, true),
 								0, 5.0, Color.green, true))); 
 				
+		BotPortrayal.setField( new SpatialNetwork2D( SM.yard,SM.AllBotNetwork ) );
+		BotPortrayal.setPortrayalForAll(new SimpleEdgePortrayal2D());
 
 		
 
@@ -135,7 +137,7 @@ public class SimuModelWithUI extends GUIState{
 		displayFrame.setTitle("Yard Display");
 		c.registerFrame(displayFrame); // so the frame appears in the "Display" list
 		displayFrame.setVisible(true);
-		
+		display.attach( BotPortrayal, "Buddies" );
 		display.attach( yardPortrayal, "Yard" );
 	}
 	
