@@ -30,24 +30,49 @@ import simulationModel.SimuModel;
  * communicatingX : false
  *  
  */
-public class BotY implements Steppable {
+public class BotY extends Bot {
+	
 
 	public String Status="";
 	public boolean isOccupied = false;
 	SimuModel SM;
+	double speedMultiplier = 0.001;
+
+	
 	public BotY() {
 		Status = StringProvider.STATUS_WAITING;
+		PrimeIdentifier=StringProvider.PRIMEIDENTIFIERY;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void step(SimState state) {
+		
+		
 		SM = (SimuModel) state;
 		Continuous2D yard = SM.yard;
 		Double2D me = SM.yard.getObjectLocation(this);
 		MutableDouble2D sumForces = new MutableDouble2D();
-
+		sumForces.addIn(me);
 		if(isOccupied)
-			return;
+		{
+			Bag out = SM.AllBotNetwork.getEdges(this, null);
+			if(out!= null && out.size()>=1)
+			{
+				int i = 0;
+				i = out.size()-1;
+			Edge e = (Edge)(out.get(i));
+			if(e!= null)
+			{
+		
+			Double2D him = SM.yard.getObjectLocation(e.getOtherNode(this));
+			
+			sumForces.addIn(new Double2D((him.x-me.x )*speedMultiplier,	(him.y-me.y )*speedMultiplier));
+			}
+			}
+		}
+		else
+		{
 		Bag AllBots = SM.AllBotNetwork.getAllNodes();
 		for(int i = 0; i < AllBots.size(); i++)
 		{
@@ -76,8 +101,8 @@ public class BotY implements Steppable {
 							nearest = (BotY) NearestNeighbors.get(j);
 						}
 						}
-						//PB D'AFFECTATION, A reflechir....
 						
+					}
 						if(nearest!= null && nearest.equals(this))
 						{
 							SM.AllBotNetwork.addEdge(this, b, "coming");
@@ -86,29 +111,30 @@ public class BotY implements Steppable {
 							this.Status = StringProvider.STATUS_RESPONDING;
 							break;
 						}
-					}
+					
 				}
 			}
-
-
 			
 		}
+
 		// add a bit of randomness
-		sumForces.addIn(new Double2D(SM.randomMultiplier * (SM.random.nextDouble() * 1.0 - 0.5),
-				SM.randomMultiplier * (SM.random.nextDouble() * 1.0 - 0.5)));
+					sumForces.addIn(new Double2D(SM.randomMultiplier * (SM.random.nextDouble() * 1.0 - 0.5),
+							SM.randomMultiplier * (SM.random.nextDouble() * 1.0 - 0.5)));
 
-		sumForces.addIn(me);
-		if(sumForces.getX()>SM.yard.getWidth())
-			sumForces.setTo(new Double2D(SM.yard.getWidth(),sumForces.y));
+					
+					if(sumForces.getX()>SM.yard.getWidth())
+						sumForces.setTo(new Double2D(SM.yard.getWidth(),sumForces.y));
 
-		if(sumForces.getX()<0)
-			sumForces.setTo(new Double2D(0,sumForces.y));
+					if(sumForces.getX()<0)
+						sumForces.setTo(new Double2D(0,sumForces.y));
 
-		if(sumForces.getY()>SM.yard.getHeight())
-			sumForces.setTo(new Double2D(sumForces.x,SM.yard.getHeight()));
+					if(sumForces.getY()>SM.yard.getHeight())
+						sumForces.setTo(new Double2D(sumForces.x,SM.yard.getHeight()));
 
-		if(sumForces.getY()<0)
-			sumForces.setTo(new Double2D(0,SM.yard.getHeight()));
+					if(sumForces.getY()<0)
+						sumForces.setTo(new Double2D(0,SM.yard.getHeight()));
+		}
+		
 
 		SM.yard.setObjectLocation(this, new Double2D(sumForces));
 
