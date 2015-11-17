@@ -26,11 +26,11 @@ import simulationModel.SimuModel;
  * owning Data    : false
  *  
  */
-public class BotX extends Bot{
+public class BotX extends Bot {
 		
 	public String Status="";
 	public Boolean IsManaged;
-	Double ChanceToMakeARequest=0.05;
+	Double ChanceToMakeARequest=0.005;
 
 	SimuModel SM;
 
@@ -51,12 +51,12 @@ public class BotX extends Bot{
 		{
 			Double2D me = SM.yard.getObjectLocation(this);
 			Bag out = SM.AllBotNetwork.getEdges(this, null);
-			if(out != null && out.size()>=1)
+			if(out != null && out.size()>=1 && !Status.equals(StringProvider.STRING_REQUESTINGANDWAITINGANSWER))
 			{
 				Edge e = (Edge)(out.get(0));
 				
 				Double2D him = SM.yard.getObjectLocation(e.getOtherNode(this));
-				if(him != null && me.distance(him)<5)//connexion etablie
+				if(him != null && me.distance(him)<5 && !((BotY)SM.yard.getObjectsAtLocation(him).get(0)).haveData && e.info.equals("coming"))//connexion etablie ( dangereux à terme d'identifier un objet par sa position, à revoir, passer par id, de manière generale revoir la gestion des etapes, commenter et organiser
 				{
 					//demande une info d'un BOTX random
 					Bag list = SM.yard.getAllObjects();
@@ -67,7 +67,7 @@ public class BotX extends Bot{
 					ToRequest =Math.abs(SM.random.nextInt()%(list.size()-1));
 					}
 					SM.AllBotNetwork.addEdge(e.getOtherNode(this),SM.yard.getAllObjects().get(ToRequest),"target");
-					
+					Status = StringProvider.STRING_REQUESTINGANDWAITINGANSWER;
 				}
 			}
 		}
@@ -98,5 +98,10 @@ public class BotX extends Bot{
 		default:
 			return new Color(0,0,204); 
 		} 
+	}
+
+	public void feeded() {
+	IsManaged = false;
+	Status = StringProvider.STATUS_STANDBY;
 	}
 }

@@ -35,8 +35,9 @@ public class BotY extends Bot {
 
 	public String Status="";
 	public boolean isOccupied = false;
+	public boolean haveData = false;
 	SimuModel SM;
-	double speedMultiplier = 0.001;
+	double speedMultiplier = 0.01;
 
 	
 	public BotY() {
@@ -64,15 +65,36 @@ public class BotY extends Bot {
 			Edge e = (Edge)(out.get(i));
 			if(e!= null)
 			{
-		
+					
 			Double2D him = SM.yard.getObjectLocation(e.getOtherNode(this));
-			
+			if(him != null && me.distance(him)<5 && e.info.equals("target") )
+			{
+				haveData = true;
+				SM.AllBotNetwork.removeEdge(e);
+				e = (Edge)(out.get(i-1));
+			}
+			else if(him != null && me.distance(him)<5 && e.info.equals("coming") && haveData==true )
+			{
+				haveData=false;
+				((BotX)SM.yard.getObjectsAtLocation(him).get(0)).feeded();
+				Status = StringProvider.STATUS_WAITING;
+				isOccupied = false;
+				SM.AllBotNetwork.removeEdge(e);
+				
+				
+			}
+			if(isOccupied)
 			sumForces.addIn(new Double2D((him.x-me.x )*speedMultiplier,	(him.y-me.y )*speedMultiplier));
 			}
 			}
+			
+				
 		}
 		else
 		{
+			
+			sumForces.addIn(new Double2D((yard.width * 0.5 - me.x) *speedMultiplier,
+					(yard.height * 0.5 - me.y) * speedMultiplier));
 		Bag AllBots = SM.AllBotNetwork.getAllNodes();
 		for(int i = 0; i < AllBots.size(); i++)
 		{
