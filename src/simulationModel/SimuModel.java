@@ -25,7 +25,7 @@ public class SimuModel extends SimState {
 	public double randomMultiplier = 0.1;
 	public Network AllBotNetwork = new Network(false);
 	
-	
+	//num of Bots 
 	public int numBotX = 5;
 	public int numBotY = 5;
 
@@ -35,7 +35,7 @@ public class SimuModel extends SimState {
 		// TODO Auto-generated constructor stub
 	}
 
-
+// general ordonanceur
 	public void start()
 	{
 		super.start();

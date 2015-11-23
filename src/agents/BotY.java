@@ -33,10 +33,18 @@ import simulationModel.SimuModel;
 public class BotY extends Bot {
 	
 
+	// inform on status as well as status on BotX
+	// the differents values for BotY are : 
+	// WAITING when BotY are waiting for a request to handle
+	// RESPONDING when occupied to search answer or go to a new requester
 	public String Status="";
+	//is handling something
 	public boolean isOccupied = false;
+	//carry data
 	public boolean haveData = false;
 	SimuModel SM;
+	
+	//speed indicator
 	double speedMultiplier = 0.01;
 
 	
@@ -58,6 +66,7 @@ public class BotY extends Bot {
 		if(isOccupied)
 		{
 			Bag out = SM.AllBotNetwork.getEdges(this, null);
+			
 			if(out!= null && out.size()>=1)
 			{
 				int i = 0;
@@ -67,6 +76,7 @@ public class BotY extends Bot {
 			{
 					
 			Double2D him = SM.yard.getObjectLocation(e.getOtherNode(this));
+			//get the most recent node ( come or come back)
 			if(him != null && me.distance(him)<5 && e.info.equals("target") )
 			{
 				haveData = true;
@@ -76,7 +86,7 @@ public class BotY extends Bot {
 			else if(him != null && me.distance(him)<5 && e.info.equals("coming") && haveData==true )
 			{
 				haveData=false;
-				((BotX)SM.yard.getObjectsAtLocation(him).get(0)).feeded();
+				((BotX)SM.yard.getObjectsAtLocation(him).get(0)).feeded();// danger ! to confuse diff objects at diff locations
 				Status = StringProvider.STATUS_WAITING;
 				isOccupied = false;
 				SM.AllBotNetwork.removeEdge(e);
@@ -100,10 +110,10 @@ public class BotY extends Bot {
 		{
 			Object bot = AllBots.get(i);
 
-			if(bot.getClass().equals(BotX.class)) //if it is a BOTX
+			if(bot != null &&bot.getClass().equals(BotX.class)) //if it is a BOTX
 			{
 				BotX b= (BotX) bot;
-				if(b.Status.equals(StringProvider.STATUS_REQUESTING)&&b.IsManaged == false)//And requestind (add after isCaredbySomeone)
+				if(b.Status.equals(StringProvider.STATUS_REQUESTING)&&b.IsManaged == false)//And requestind 
 				{
 					Bag NearestNeighbors = SM.yard.getAllObjects();
 					Double2D posb = SM.yard.getObjectLocation(b);
@@ -129,6 +139,7 @@ public class BotY extends Bot {
 						{
 							SM.AllBotNetwork.addEdge(this, b, "coming");
 							b.IsManaged= true;
+							b.request.Handler = this;
 							this.isOccupied = true;
 							this.Status = StringProvider.STATUS_RESPONDING;
 							break;
@@ -163,6 +174,7 @@ public class BotY extends Bot {
 
 	}
 
+	//used to paint on IHM the bot 
 	public Paint getColor() {
 		switch (Status)
 		{

@@ -1,5 +1,7 @@
 package agents;
 
+import java.awt.Paint;
+
 import sim.engine.SimState;
 import sim.engine.Steppable;
 
@@ -10,6 +12,11 @@ public abstract class Bot  implements Steppable{
 	@Override
 	public void step(SimState arg0) {
 		
+	}
+	
+	public Paint getColor() {
+		return null;
+	
 	}
 
 }

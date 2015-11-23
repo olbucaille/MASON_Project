@@ -3,6 +3,7 @@ package agents;
 import java.awt.Color;
 import java.awt.Paint;
 
+import businesslayer.Request;
 import businesslayer.StringProvider;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -28,10 +29,20 @@ import simulationModel.SimuModel;
  */
 public class BotX extends Bot {
 		
+	//representing its current status, it is updated either by itself or not.
+	//it can take the following values : 
+	// STANDBY : -> doing nothing
+	// REQUESTING : -> requesting, no bot came to handle it yet
+	//STRING_REQUESTINGANDWAITINGANSWER : -> a bot came, it wait the answer to close the request
 	public String Status="";
+	
+	// reprensenting if a botY is handling the request yet 
 	public Boolean IsManaged;
+	
+	// describe the percentage to make a request at each step.
 	Double ChanceToMakeARequest=0.005;
 
+	Request request;
 	SimuModel SM;
 
 	public BotX() {
@@ -43,6 +54,7 @@ public class BotX extends Bot {
 	@Override
 	public void step(SimState state) {
 		SM=(SimuModel) state;
+		//if do nothinf, then check if it have to make a request
 		if(Status.equals(StringProvider.STATUS_STANDBY))
 		{	if(DoIRequest())
 			MakeARequest();
@@ -50,13 +62,14 @@ public class BotX extends Bot {
 		else
 		{
 			Double2D me = SM.yard.getObjectLocation(this);
-			Bag out = SM.AllBotNetwork.getEdges(this, null);
-			if(out != null && out.size()>=1 && !Status.equals(StringProvider.STRING_REQUESTINGANDWAITINGANSWER))
+			
+			if(!Status.equals(StringProvider.STRING_REQUESTINGANDWAITINGANSWER))
 			{
-				Edge e = (Edge)(out.get(0));
 				
-				Double2D him = SM.yard.getObjectLocation(e.getOtherNode(this));
-				if(him != null && me.distance(him)<5 && !((BotY)SM.yard.getObjectsAtLocation(him).get(0)).haveData && e.info.equals("coming"))//connexion etablie ( dangereux à terme d'identifier un objet par sa position, à revoir, passer par id, de manière generale revoir la gestion des etapes, commenter et organiser
+				
+				Double2D him = SM.yard.getObjectLocation(request.Handler);
+				// if distance <5 and bot approching is owning a data ( so coming back) and is on the node with info "coming")
+				if(him != null && me.distance(him)<5 && !(request.Handler.haveData))//connexion etablie (FIXEDDDDDDD, I GUESS... dangereux à terme d'identifier un objet par sa position, à revoir, passer par id, de manière generale revoir la gestion des etapes, commenter et organiser
 				{
 					//demande une info d'un BOTX random
 					Bag list = SM.yard.getAllObjects();
@@ -66,7 +79,8 @@ public class BotX extends Bot {
 					//	System.out.println(SM.random.nextInt()%(list.size()-1));
 					ToRequest =Math.abs(SM.random.nextInt()%(list.size()-1));
 					}
-					SM.AllBotNetwork.addEdge(e.getOtherNode(this),SM.yard.getAllObjects().get(ToRequest),"target");
+					request.provider = (BotX) SM.yard.getAllObjects().get(ToRequest);
+					SM.AllBotNetwork.addEdge(request.Handler,request.provider,"target");
 					Status = StringProvider.STRING_REQUESTINGANDWAITINGANSWER;
 				}
 			}
@@ -77,7 +91,7 @@ public class BotX extends Bot {
 
 	private void MakeARequest() {
 
-
+		request = new Request(this);
 		Status = StringProvider.STATUS_REQUESTING;
 
 	}
@@ -86,7 +100,7 @@ public class BotX extends Bot {
 		return SM.random.nextBoolean(ChanceToMakeARequest);
 
 	}
-
+//used to paint on IHM the bot 
 	public Paint getColor() {
 		switch (Status)
 		{
@@ -101,6 +115,7 @@ public class BotX extends Bot {
 	}
 
 	public void feeded() {
+		request = null;
 	IsManaged = false;
 	Status = StringProvider.STATUS_STANDBY;
 	}
