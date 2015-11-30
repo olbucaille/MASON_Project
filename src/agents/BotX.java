@@ -44,7 +44,7 @@ public class BotX extends Bot {
 
 	Request request;
 	SimuModel SM;
-
+ public Double getChance(){return ChanceToMakeARequest;}
 	public BotX() {
 		Status = StringProvider.STATUS_STANDBY;
 		IsManaged = false;
@@ -82,6 +82,8 @@ public class BotX extends Bot {
 					request.provider = (BotX) SM.yard.getAllObjects().get(ToRequest);
 					SM.AllBotNetwork.addEdge(request.Handler,request.provider,"target");
 					Status = StringProvider.STRING_REQUESTINGANDWAITINGANSWER;
+					SimuModel.NumberOfRequestPending--;
+					SimuModel.NumberOfRequestCurrentlyManaged++;
 				}
 			}
 		}
@@ -93,6 +95,7 @@ public class BotX extends Bot {
 
 		request = new Request(this);
 		Status = StringProvider.STATUS_REQUESTING;
+		SimuModel.NumberOfRequestPending++;
 
 	}
 
@@ -118,5 +121,7 @@ public class BotX extends Bot {
 		request = null;
 	IsManaged = false;
 	Status = StringProvider.STATUS_STANDBY;
+	SimuModel.NumberOfRequestCurrentlyManaged--;
+	SimuModel.NumberOfRequestTreated++;
 	}
 }

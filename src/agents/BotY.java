@@ -45,9 +45,9 @@ public class BotY extends Bot {
 	SimuModel SM;
 	
 	//speed indicator
-	double speedMultiplier = 0.01;
+	double speedMultiplier = 0.1;
 
-	
+	 public Double getspeedMultiplier(){return speedMultiplier;}
 	public BotY() {
 		Status = StringProvider.STATUS_WAITING;
 		PrimeIdentifier=StringProvider.PRIMEIDENTIFIERY;
