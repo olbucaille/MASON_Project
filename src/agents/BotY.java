@@ -42,15 +42,23 @@ public class BotY extends Bot {
 	public boolean isOccupied = false;
 	//carry data
 	public boolean haveData = false;
+	//Energy available
+	public float Energy; 
+	//minEnergy at begining 
+	public float minEnergy = (float) 1500.0;
+	//level where if not busy, it goes refill
+	public float minEnergyRefill = (float) 500.0;
 	SimuModel SM;
 	
 	//speed indicator
 	double speedMultiplier = 0.1;
+	public boolean isRefulling = false ;
 
 	 public Double getspeedMultiplier(){return speedMultiplier;}
 	public BotY() {
 		Status = StringProvider.STATUS_WAITING;
 		PrimeIdentifier=StringProvider.PRIMEIDENTIFIERY;
+		Energy = minEnergy;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -63,6 +71,17 @@ public class BotY extends Bot {
 		Double2D me = SM.yard.getObjectLocation(this);
 		MutableDouble2D sumForces = new MutableDouble2D();
 		sumForces.addIn(me);
+		if(doINeedEnergy(me))
+		{
+			isRefulling = true;
+		}
+		if(isRefulling)
+		{
+			Object EBS = getClosestEBS(me);
+			sumForces.addIn(new Double2D((SM.yard.getObjectLocation(EBS).x-me.x )*speedMultiplier,	(SM.yard.getObjectLocation(EBS).y-me.y )*speedMultiplier));
+			
+		}
+		else
 		if(isOccupied)
 		{
 			Bag out = SM.AllBotNetwork.getEdges(this, null);
@@ -168,14 +187,72 @@ public class BotY extends Bot {
 						sumForces.setTo(new Double2D(0,SM.yard.getHeight()));
 		}
 		
-
+		Double2D deb = SM.yard.getObjectLocation(this);
+		if(!(Energy-sumForces.distance(me)<=0))//avance seulement si l'on a de l'energie
+		{
 		SM.yard.setObjectLocation(this, new Double2D(sumForces));
+		Energy -=  Math.abs(sumForces.distance(me));//consomation d'energie
+		}
+	
 
 
 	}
 
+	private boolean doINeedEnergy(Double2D me) {
+		if(isOccupied)
+		{
+			float distance=0;
+		
+			Bag out = SM.AllBotNetwork.getEdges(this, null);
+				Edge e = (Edge)(out.get(0));
+			
+				if(out.numObjs==1)
+				distance+= me.distance(SM.yard.getObjectLocation(e.getOtherNode(this)));//si un seul node -> un aller -> *1 et point barre
+				if(out.numObjs==2)
+				{
+				distance+= me.distance(SM.yard.getObjectLocation(e.getOtherNode(this)))*2;//sinon aller retour donc aller *2
+				 e = (Edge)(out.get(1));
+				distance+= me.distance(SM.yard.getObjectLocation(e.getOtherNode(this)));//+ compter le reste de l'autre node
+				
+				}
+				//ajouter le cout point arrivée -> base de rechargement
+				BotEnergyBaseStation closestEBS =getClosestEBS(me);
+				distance += SM.yard.getObjectLocation(e.getOtherNode(this)).distance(SM.yard.getObjectLocation(closestEBS));
+				if(distance > Energy)
+					return true;
+			
+		}
+		else
+		{
+			if( Energy <minEnergyRefill)
+				return true;
+		}
+		return false;
+	}
+	private BotEnergyBaseStation getClosestEBS(Double2D me) {
+		double distance=1000000000;
+		BotEnergyBaseStation closest=null;
+		Bag all =SM.yard.getAllObjects();
+		int j=0;
+		while (j<all.numObjs)
+		{
+		if(all.get(j).getClass().equals(BotEnergyBaseStation.class))
+		{
+			if(distance>me.distance(SM.yard.getObjectLocation(all.get(j))))
+			{
+			distance = me.distance(SM.yard.getObjectLocation(all.get(j)));
+			closest = (BotEnergyBaseStation) all.get(j);
+			}
+		}
+		j++;
+		}
+		return closest;
+	}
 	//used to paint on IHM the bot 
 	public Paint getColor() {
+		
+		if (isRefulling)
+			return new Color(255,0,0); 
 		switch (Status)
 		{
 		case StringProvider.STATUS_WAITING:

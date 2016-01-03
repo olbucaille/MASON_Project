@@ -15,5 +15,6 @@ public class StringProvider {
 	
 	public static final String PRIMEIDENTIFIERY = "Y";
 	public static final String PRIMEIDENTIFIERX = "X";
+	public static final String TRYINGTOREFILL = "TRYINGTOREFILL";
 	
 }

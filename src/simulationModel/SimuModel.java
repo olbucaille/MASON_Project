@@ -1,5 +1,6 @@
 package simulationModel;
 
+import agents.BotEnergyBaseStation;
 import agents.BotX;
 import agents.BotY;
 import sim.engine.SimState;
@@ -24,28 +25,29 @@ public class SimuModel extends SimState {
 	public Continuous2D yard = new Continuous2D(1.0,100,100);
 	public double randomMultiplier = 0.1;
 	public Network AllBotNetwork = new Network(false);
-	
+
 	//sum of all reuquest DONE 
 	public static long NumberOfRequestTreated = 0;
-	
+
 	// a request has been raised but no ones cares
 	public static long NumberOfRequestPending = 0;
-	
+
 	//currently managed -> a bot is taking care of the request but not yet finished
 	public static long NumberOfRequestCurrentlyManaged = 0;
-	
+
 	//allows to get a percentage
 	public double getNumberOfRequestTreatedOverTime(){
 		if (this.schedule.getSteps()!= 0 )
 		{
-		
-		return (float)NumberOfRequestTreated/this.schedule.getSteps();
+
+			return (float)NumberOfRequestTreated/this.schedule.getSteps();
 		}
 		return 0;}
 
 	//num of Bots 
 	public int numBotX = 10;
 	public int numBotY = 9;
+	public int numBotEnergyBaseStation = 2;
 
 
 
@@ -53,10 +55,10 @@ public class SimuModel extends SimState {
 		super(seed);
 		// TODO Auto-generated constructor stub
 	}
-	
-	
 
-// general ordonanceur
+
+
+	// general ordonanceur
 	public void start()
 	{
 		super.start();
@@ -66,8 +68,8 @@ public class SimuModel extends SimState {
 
 		//clear the whole network
 		AllBotNetwork.clear();
-		
-	
+
+
 		// add some BotsX to the yard
 		for(int i = 0; i < numBotX; i++)
 		{
@@ -90,11 +92,34 @@ public class SimuModel extends SimState {
 			AllBotNetwork.addNode(botY);
 		}
 
+		// add some BotsEnergyBaseStation to the yard
+		for(int i = 0; i < numBotEnergyBaseStation; i++)
+		{
+			BotEnergyBaseStation botEBS = new BotEnergyBaseStation();
+			yard.setObjectLocation(botEBS,
+					new Double2D(yard.getWidth() *  random.nextDouble() ,
+							yard.getHeight() *  random.nextDouble() ));
+			schedule.scheduleRepeating(botEBS);
+			AllBotNetwork.addNode(botEBS);
+		}
+
 	}
-	
 
 
-	
+
+
+	public int getNumBotEnergyBaseStation() {
+		return numBotEnergyBaseStation;
+	}
+
+
+
+	public void setNumBotEnergyBaseStation(int numBotEnergyBaseStation) {
+		this.numBotEnergyBaseStation = numBotEnergyBaseStation;
+	}
+
+
+
 	public int getNumBotX() {
 		return numBotX;
 	}
