@@ -5,6 +5,8 @@ import java.awt.Paint;
 
 import javax.swing.event.SwingPropertyChangeSupport;
 
+import businesslayer.Request;
+import businesslayer.SimpleRequest;
 import businesslayer.StringProvider;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -53,6 +55,7 @@ public class BotY extends Bot {
 	//speed indicator
 	double speedMultiplier = 0.1;
 	public boolean isRefulling = false ;
+	private Request Myrequest;
 
 	 public Double getspeedMultiplier(){return speedMultiplier;}
 	public BotY() {
@@ -98,9 +101,25 @@ public class BotY extends Bot {
 			//get the most recent node ( come or come back)
 			if(him != null && me.distance(him)<5 && e.info.equals("target") )
 			{
-				haveData = true;
-				SM.AllBotNetwork.removeEdge(e);
-				e = (Edge)(out.get(i-1));
+			
+				if(Myrequest.type.equals(StringProvider.TYPESIMPLEREQUEST))// FIN process si c'est une requete simple
+				{
+					Myrequest.requester.feeded();
+					haveData=false;
+				
+					Status = StringProvider.STATUS_WAITING;
+					isOccupied = false;
+					Bag out2 = SM.AllBotNetwork.getEdges(this, null);
+					SM.AllBotNetwork.removeEdge((Edge)(out.get(0)));
+					SM.AllBotNetwork.removeEdge((Edge)(out.get(1)));
+					
+				}
+				else //SINON,...on termine
+				{
+					haveData = true;
+					SM.AllBotNetwork.removeEdge(e);
+					e = (Edge)(out.get(i-1));
+				}
 			}
 			else if(him != null && me.distance(him)<5 && e.info.equals("coming") && haveData==true )
 			{
@@ -159,6 +178,7 @@ public class BotY extends Bot {
 							SM.AllBotNetwork.addEdge(this, b, "coming");
 							b.IsManaged= true;
 							b.request.Handler = this;
+							Myrequest = b.request; 
 							this.isOccupied = true;
 							this.Status = StringProvider.STATUS_RESPONDING;
 							break;

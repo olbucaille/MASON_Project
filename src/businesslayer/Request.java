@@ -5,6 +5,7 @@ import agents.BotY;
 
 public class Request {
 
+	public String type; 
 	public String Status; 
 	public BotX requester;
 	public BotY Handler;
@@ -12,6 +13,7 @@ public class Request {
 	
 	public Request(BotX requester ,BotY handler)
 	{
+		type = StringProvider.TYPENORMALREQUEST;
 		this.requester = requester;
 		this.Handler = handler;
 		Status = StringProvider.STATUS_DATAASKED;
@@ -19,7 +21,8 @@ public class Request {
 	}
 
 	public Request(BotX botX) {
-		this.requester = requester;
+		type = StringProvider.TYPENORMALREQUEST;
+		this.requester = botX;
 
 		Status = StringProvider.STATUS_DATAASKED;
 	}
