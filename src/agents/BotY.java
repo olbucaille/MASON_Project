@@ -52,6 +52,7 @@ public class BotY extends Bot {
 	public float minEnergyRefill = (float) 500.0;
 	SimuModel SM;
 	
+	public Double2D defaultPos;
 	//speed indicator
 	double speedMultiplier = 0.1;
 	public boolean isRefulling = false ;
@@ -63,6 +64,10 @@ public class BotY extends Bot {
 		PrimeIdentifier=StringProvider.PRIMEIDENTIFIERY;
 		Energy = minEnergy;
 	}
+	
+	public void setDefautPos(Double2D defaultPos){
+		this.defaultPos=defaultPos;
+	}
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -72,6 +77,7 @@ public class BotY extends Bot {
 		SM = (SimuModel) state;
 		Continuous2D yard = SM.yard;
 		Double2D me = SM.yard.getObjectLocation(this);
+		
 		MutableDouble2D sumForces = new MutableDouble2D();
 		sumForces.addIn(me);
 		if(doINeedEnergy(me))
@@ -141,8 +147,8 @@ public class BotY extends Bot {
 		else
 		{
 			
-			sumForces.addIn(new Double2D((yard.width * 0.5 - me.x) *speedMultiplier,
-					(yard.height * 0.5 - me.y) * speedMultiplier));
+			sumForces.addIn(new Double2D((defaultPos.x - me.x) *speedMultiplier,
+					(defaultPos.y - me.y) * speedMultiplier));
 		Bag AllBots = SM.AllBotNetwork.getAllNodes();
 		for(int i = 0; i < AllBots.size(); i++)
 		{
@@ -235,7 +241,7 @@ public class BotY extends Bot {
 				distance+= me.distance(SM.yard.getObjectLocation(e.getOtherNode(this)));//+ compter le reste de l'autre node
 				
 				}
-				//ajouter le cout point arrivée -> base de rechargement
+				//ajouter le cout point arrivï¿½e -> base de rechargement
 				BotEnergyBaseStation closestEBS =getClosestEBS(me);
 				distance += SM.yard.getObjectLocation(e.getOtherNode(this)).distance(SM.yard.getObjectLocation(closestEBS));
 				if(distance > Energy)

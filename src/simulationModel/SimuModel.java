@@ -164,7 +164,8 @@ public class SimuModel extends SimState {
 			for(int i = 0; i < numBotY; i++)
 			{
 				BotY botY = new BotY();
-				yard.setObjectLocation(botY, groupList.get(i).getBarycentre());
+				botY.setDefautPos( groupList.get(i).getBarycentre());
+				yard.setObjectLocation(botY, groupList.get(i).getBarycentre());			
 				schedule.scheduleRepeating(botY);
 				AllBotNetwork.addNode(botY);
 			}
