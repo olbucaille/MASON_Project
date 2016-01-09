@@ -1,14 +1,19 @@
 package optimum_position;
 
+import sim.util.Double2D;
+
 
 public class Vertex {
   final private String id;
   final private String name;
+  final private Double2D pos;
+  private boolean visited;
   
   
-  public Vertex(String id, String name) {
+  public Vertex(String id, String name,Double2D pos) {
     this.id = id;
     this.name = name;
+    this.pos=pos;
   }
   public String getId() {
     return id;
@@ -45,7 +50,12 @@ public class Vertex {
 
   @Override
   public String toString() {
-    return name;
+	  String str = "name : "+name+" posX : "+ pos.x+" posY :"+pos.y+"\n";
+    return str;
   }
+public Double2D getPos() {
+	return pos;
+}
+
   
 } 
